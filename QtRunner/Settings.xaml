@@ -1,0 +1,20 @@
+﻿<Window x:Class="QtRunner.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:QtRunner"
+        mc:Ignorable="d"
+        Title="Settings" Height="127" Width="466" ResizeMode="NoResize">
+    <Grid Margin="0,0,0,0">
+        <Label Content="Python Path:" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <TextBox Name="pythonPathTextBox" TextWrapping="NoWrap" Text="{Binding PythonPath, Mode=TwoWay}" Margin="10,28,116,0" Height="20" VerticalAlignment="Top" MaxLines="1">
+            <TextBox.DataContext>
+                <local:RunSettings/>
+            </TextBox.DataContext>
+        </TextBox>
+        <Button Content="Browse"  Name="pythonPathBrowseBtn" Margin="355,28,15,0" VerticalAlignment="Top" Click="pythonPathBrowseBtn_Click"/>
+        <Button Content="Save" Name="saveBtn" HorizontalAlignment="Left" Margin="248,58,0,0" VerticalAlignment="Top" Width="71" Click="saveBtn_Click"/>
+        <Button Content="Cancel" Name="cancelBtn" HorizontalAlignment="Left" Margin="147,58,0,0" VerticalAlignment="Top" Width="71" Click="cancelBtn_Click"/>
+    </Grid>
+</Window>
