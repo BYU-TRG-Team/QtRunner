@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Win32;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace QtRunner
 {
@@ -19,26 +9,47 @@ namespace QtRunner
     /// </summary>
     public partial class Settings : Window
     {
-        string InitialPath { get; set; }
-        public Settings(string initialPath)
+        public string Result { get => pythonPathTextBox.Text; }
+
+        public Settings(string? initialPath = null)
         {
             InitializeComponent();
 
-            InitialPath = initialPath;
+            if (initialPath != null) pythonPathTextBox.Text = initialPath;
         }
 
         private void pythonPathBrowseBtn_Click(object sender, RoutedEventArgs e)
         {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var appDataPython = Path.Combine(appData, "Programs", "Python");
+            var candidates = Directory.GetDirectories(appDataPython)?.OrderDescending();
+            var highestVersion = candidates?.LastOrDefault() ?? string.Empty;
+
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Python EXE|python.exe"
+            };
+            if (!string.IsNullOrEmpty(highestVersion))
+            {
+                openFileDialog.InitialDirectory = highestVersion;
+                openFileDialog.Multiselect = false;
+            }
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                pythonPathTextBox.Text = openFileDialog.FileName;    
+            }
+
         }
 
         private void saveBtn_Click(object sender, RoutedEventArgs e)
         {
+            DialogResult = true;
             Close();
         }
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
         {
-            pythonPathTextBox.Text = InitialPath;
             Close(); 
         }
     }

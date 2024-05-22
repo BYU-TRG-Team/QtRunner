@@ -1,15 +1,8 @@
 ﻿using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 
 namespace QtRunner
 {
@@ -30,7 +23,7 @@ namespace QtRunner
         {
             OpenFileDialog openFileDialog = new()
             {
-                DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 Filter = "Python files|*.py",
                 CheckFileExists = true
             };
@@ -42,14 +35,13 @@ namespace QtRunner
         private void settingsMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Settings settings = new(RunSettings.PythonPath);
-            settings.DataContext = RunSettings;
-            if (settings.ShowDialog() != true) return;
+            if (settings.ShowDialog() == true) RunSettings.PythonPath = settings.Result;
         }
 
         private void runBtn_Click(object sender, RoutedEventArgs e)
         {
             Process process = new();
-            process.StartInfo.FileName = string.IsNullOrWhiteSpace(RunSettings.PythonPath) ? "cmd.exe" : RunSettings.PythonPath;
+            process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardOutput = true;
@@ -57,9 +49,16 @@ namespace QtRunner
             process.OutputDataReceived += Process_OutputDataReceived;
             process.Start();
             process.BeginOutputReadLine();
-            process.StandardInput.WriteLine("python.exe -m venv venv");
+
+            var pythonExe = File.Exists(RunSettings.PythonPath) ? RunSettings.PythonPath : "python.exe";
+            var scriptDirectory = Path.GetDirectoryName(RunSettings.ScriptPath);
+            var requirementsTxt = Path.Combine(scriptDirectory!, "requirements.txt");
+            process.StandardInput.WriteLine($"{pythonExe} -m venv venv");
             process.StandardInput.WriteLine(@".\venv\Scripts\activate.bat");
-            process.StandardInput.WriteLine($"pip install -r {Path.Combine(Path.GetDirectoryName(RunSettings.ScriptPath), "requirements.txt")}");
+            if (File.Exists(requirementsTxt))
+            {
+                process.StandardInput.WriteLine($"pip install -r {requirementsTxt}");
+            }
             process.StandardInput.WriteLine($"python.exe {RunSettings.ScriptPath}");
             process.StandardInput.Flush();
             process.StandardInput.Close();
@@ -73,6 +72,11 @@ namespace QtRunner
         private void statusTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             statusTextBox.ScrollToEnd();
+        }
+
+        private void exitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

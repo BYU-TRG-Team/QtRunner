@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
+﻿using System.ComponentModel;
+using System.Configuration;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace QtRunner
 {
     public class RunSettings : INotifyPropertyChanged
     {
+        Configuration Configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
         string _scriptPath = string.Empty;
         public string ScriptPath {
             get => _scriptPath;
@@ -22,12 +18,17 @@ namespace QtRunner
             }
         }
 
-        string _pythonPath = string.Empty;
         public string PythonPath {
-            get => _pythonPath;
-            set { 
-                if (value == _pythonPath) return;
-                _pythonPath = value;
+            get => Configuration.AppSettings.Settings["PythonPath"]?.Value ?? string.Empty;
+            set {
+                if (Configuration.AppSettings.Settings.AllKeys.Contains("PythonPath"))
+                {
+                    Configuration.AppSettings.Settings["PythonPath"].Value = value;
+                } else
+                {
+                    Configuration.AppSettings.Settings.Add("PythonPath", value);
+                }
+                Configuration.Save(ConfigurationSaveMode.Modified);
                 OnPropertyChanged(nameof(PythonPath));
             }
         }
